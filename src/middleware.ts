@@ -4,7 +4,6 @@ import { withAuth } from "next-auth/middleware";
 export default withAuth({
   callbacks: {
     authorized({ req, token }) {
-      console.log({ token, req: req.nextUrl.pathname });
       if (req.nextUrl.pathname.startsWith("/admin")) {
         // @ts-ignore
         return token?.user.role === USER_ROLE.ADMIN;
