@@ -1,4 +1,4 @@
-import LayoutSite from "@/components/layouts/app";
+import LayoutSite from "@/components/layouts/store";
 import { NextPageWithLayout } from "../_app";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";

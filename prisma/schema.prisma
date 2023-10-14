@@ -6,12 +6,13 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 model Account {
-  id                String  @id @default(cuid())
+  id                String  @id @default(uuid())
   userId            String
   type              String
   provider          String
@@ -27,18 +28,21 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
-  id           String   @id @default(cuid())
+  id           String   @id @default(uuid())
   sessionToken String   @unique
-  userId       String
   expires      DateTime
+  userId       String
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String    @id @default(uuid())
   name          String?
   email         String?   @unique
   emailVerified DateTime?
@@ -51,6 +55,7 @@ model User {
 
   accounts Account[]
   sessions Session[]
+  orders   Order[]
 }
 
 enum USER_ROLE {
@@ -64,4 +69,101 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Product {
+  id           String             @id @default(uuid())
+  name         String
+  description  String?
+  status       PRODUCT_STATUS     @default(DRAFT)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  collectionId String?
+  collection   ProductCollection? @relation(fields: [collectionId], references: [id])
+  image        Image[]
+  options      ProductOption[]
+
+  @@index([collectionId])
+}
+
+model ProductOption {
+  id        String           @id @default(uuid())
+  name      String
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  productId String?
+  product   Product?         @relation(fields: [productId], references: [id])
+  variants  ProductVariant[]
+
+  @@index([productId])
+}
+
+model ProductVariant {
+  id          String          @id @default(uuid())
+  name        String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  price       Float
+  originPrice Float
+  invetory    Int             @default(1)
+  options     ProductOption[]
+  orderItems  OrderItem[]
+}
+
+enum PRODUCT_STATUS {
+  ACTIVE
+  DRAFT
+}
+
+model ProductCollection {
+  id        String    @id @default(uuid())
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+}
+
+model Image {
+  id        String   @id @default(uuid())
+  url       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+}
+
+model Order {
+  id          String       @id @default(uuid())
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  status      ORDER_STATUS @default(PENDING)
+  shippingFee Float?
+  userId      String?
+  user        User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       OrderItem[]
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id               String          @id @default(uuid())
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  orderId          String?
+  order            Order?          @relation(fields: [orderId], references: [id])
+  productVariantId String?
+  productVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])
+
+  @@index([orderId])
+  @@index([productVariantId])
+}
+
+enum ORDER_STATUS {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELED
 }

@@ -1,18 +1,27 @@
+import { Session, authOptions, getSession } from "@/lib/next-auth";
+import { USER_ROLE } from "@prisma/client";
 import type { GetServerSidePropsContext } from "next";
 import { getServerSession } from "next-auth";
-import { authOptions } from "./api/auth/[...nextauth]";
 
 export async function getServerSideProps({
   req,
   res,
 }: GetServerSidePropsContext) {
-  const session = await getServerSession(req, res, authOptions);
+  const session = (await getServerSession(req, res, authOptions)) as
+    | Session
+    | undefined;
 
   if (!session) {
-    return { redirect: { permanent: false, destination: "/login" } };
+    return { redirect: { permanent: false, destination: "/auth/signin" } };
   }
 
-  return { redirect: { permanent: false, destination: "/app" } };
+  const role = session.user.role;
+
+  if (role === USER_ROLE.ADMIN) {
+    return { redirect: { permanent: false, destination: "/admin" } };
+  }
+
+  return { redirect: { permanent: false, destination: "/store" } };
 }
 
 export default function Home() {

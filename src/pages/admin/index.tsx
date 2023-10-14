@@ -1,4 +1,4 @@
-import LayoutAdmin from "@/components/layouts/dashboard";
+import LayoutAdmin from "@/components/layouts/admin";
 import { NextPageWithLayout } from "../_app";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,12 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Overview } from "@/components/interfaces/dashboard/overview";
-import { RecentSales } from "@/components/interfaces/dashboard/recent-sales";
+import { Overview } from "@/components/interfaces/admin/overview";
+import { RecentSales } from "@/components/interfaces/admin/recent-sales";
 
 const Page: NextPageWithLayout = () => {
   return (
-    <>
+    <div className="flex flex-col gap-10">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         <div className="flex items-center space-x-2">
@@ -136,7 +136,7 @@ const Page: NextPageWithLayout = () => {
           </CardContent>
         </Card>
       </div>
-    </>
+    </div>
   );
 };
 
