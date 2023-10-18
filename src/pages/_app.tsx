@@ -4,6 +4,7 @@ import type { NextPage } from "next";
 import type { AppProps } from "next/app";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { trpc } from "../utils/trpc";
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -13,7 +14,7 @@ type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
 };
 
-export default function App({
+function App({
   Component,
   pageProps: { session, ...pageProps },
 }: AppPropsWithLayout) {
@@ -32,3 +33,5 @@ export default function App({
     </NextThemesProvider>
   );
 }
+
+export default trpc.withTRPC(App);

@@ -80,7 +80,10 @@ model Product {
   updatedAt    DateTime           @updatedAt
   collectionId String?
   collection   ProductCollection? @relation(fields: [collectionId], references: [id])
-  image        Image[]
+  price        Float
+  inventory    Int                @default(0)
+  rating       Float              @default(0)
+  images       Image[]
   options      ProductOption[]
 
   @@index([collectionId])

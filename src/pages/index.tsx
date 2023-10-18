@@ -1,4 +1,4 @@
-import { Session, authOptions, getSession } from "@/lib/next-auth";
+import { Session, authOptions } from "@/lib/next-auth";
 import { USER_ROLE } from "@prisma/client";
 import type { GetServerSidePropsContext } from "next";
 import { getServerSession } from "next-auth";

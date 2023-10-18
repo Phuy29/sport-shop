@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, Tag } from "lucide-react";
+import { BarChart3, Folder, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/router";
@@ -7,8 +7,6 @@ import { UserNav } from "./user-nav";
 
 export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
   const router = useRouter();
-
-  console.log({ path: router.asPath });
 
   return (
     <div className={cn("pb-12 h-full", className)}>
@@ -38,6 +36,18 @@ export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
           <Link href="/admin/products">
             <Tag className="h-4 w-4 mr-2" />
             Products
+          </Link>
+        </Button>
+        <Button
+          variant={
+            router.asPath === "/admin/collections" ? "secondary" : "ghost"
+          }
+          className="w-full justify-start"
+          asChild
+        >
+          <Link href="/admin/collections">
+            <Folder className="h-4 w-4 mr-2" />
+            Collection
           </Link>
         </Button>
       </div>

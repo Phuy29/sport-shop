@@ -30,9 +30,20 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       session.user = {
+        // @ts-ignore
         id: token.sub,
         // @ts-ignore
-        ...(token || session).user,
+        name: token.user.name,
+        // @ts-ignore
+        email: token.user.email,
+        // @ts-ignore
+        emailVerified: token.user.emailVerified,
+        // @ts-ignore
+        image: token.user.image,
+        // @ts-ignore
+        active: token.user.active,
+        // @ts-ignore
+        role: token.user.role,
       };
       return session;
     },
@@ -55,7 +66,10 @@ export interface Session {
   };
 }
 
-export async function getSession(req: NextApiRequest, res: NextApiResponse) {
+export async function getServerAuthSession(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   // @ts-ignore
   return await getServerSession(req, res, authOptions);
 }

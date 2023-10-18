@@ -23,7 +23,7 @@ export default function LayoutAdmin(page: ReactElement) {
             </Button>
           </div>
         </div>
-        <main className="py-6 px-6 bg-gray-50 min-h-content overflow-y-auto">
+        <main className="py-6 px-6 bg-gray-50 overflow-y-auto h-full">
           {page}
         </main>
       </div>
