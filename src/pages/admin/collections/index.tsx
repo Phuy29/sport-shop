@@ -23,9 +23,19 @@ import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 import { format } from "date-fns";
 
-type Collection = ProductCollection & {
-  products: Product[];
-};
+interface Collection {
+  name: string;
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  products: {
+    name: string;
+    price: number;
+    collectionId: string | null;
+    description: string | null;
+    updatedAt: string;
+  }[];
+}
 
 const Page: NextPageWithLayout = () => {
   const { data } = trpc.admin.collections.get.useQuery();
