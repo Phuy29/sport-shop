@@ -22,7 +22,7 @@ interface MainNavProps {
 export function MainNav({ items }: MainNavProps) {
   return (
     <div className="hidden gap-6 lg:flex">
-      <Link href="/" className="hidden items-center space-x-2 lg:flex">
+      <Link href="/store" className="hidden items-center space-x-2 lg:flex">
         <Icons.logo className="h-6 w-6" aria-hidden="true" />
         <span className="hidden font-bold lg:inline-block">
           {siteConfig.name}
@@ -41,7 +41,7 @@ export function MainNav({ items }: MainNavProps) {
                   <li className="row-span-3">
                     <NavigationMenuLink asChild>
                       <Link
-                        href="/"
+                        href="/store"
                         className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
                       >
                         <Icons.logo className="h-6 w-6" aria-hidden="true" />

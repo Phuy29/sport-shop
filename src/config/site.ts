@@ -22,13 +22,13 @@ export const siteConfig = {
       items: [
         {
           title: "Products",
-          href: "/products",
+          href: "/store/products",
           description: "All the products we have to offer.",
           items: [],
         },
         {
           title: "Blog",
-          href: "/blog",
+          href: "#",
           description: "Read our latest blog posts.",
           items: [],
         },
