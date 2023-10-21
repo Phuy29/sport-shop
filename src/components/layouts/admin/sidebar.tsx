@@ -8,6 +8,24 @@ import { UserNav } from "./user-nav";
 export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
   const router = useRouter();
 
+  const tabs = [
+    {
+      name: "Overview",
+      href: "/admin",
+      Icon: BarChart3,
+    },
+    {
+      name: "Products",
+      href: "/admin/products",
+      Icon: Tag,
+    },
+    {
+      name: "Collections",
+      href: "/admin/collections",
+      Icon: Folder,
+    },
+  ];
+
   return (
     <div className={cn("pb-12 h-full", className)}>
       <div>
@@ -18,38 +36,26 @@ export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
         <h2 className="text-gray-900 font-medium">Sport shop</h2>
       </div>
       <div className="space-y-2 py-4">
-        <Button
-          variant={router.asPath === "/admin" ? "secondary" : "ghost"}
-          className="w-full justify-start"
-          asChild
-        >
-          <Link href="/admin">
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Overview
-          </Link>
-        </Button>
-        <Button
-          variant={router.asPath === "/admin/products" ? "secondary" : "ghost"}
-          className="w-full justify-start"
-          asChild
-        >
-          <Link href="/admin/products">
-            <Tag className="h-4 w-4 mr-2" />
-            Products
-          </Link>
-        </Button>
-        <Button
-          variant={
-            router.asPath === "/admin/collections" ? "secondary" : "ghost"
-          }
-          className="w-full justify-start"
-          asChild
-        >
-          <Link href="/admin/collections">
-            <Folder className="h-4 w-4 mr-2" />
-            Collection
-          </Link>
-        </Button>
+        {tabs.map((tab, index) => {
+          return (
+            <Button
+              key={index}
+              variant={
+                router.asPath.split("?")[0].split("/").slice(0, 3).join("/") ===
+                tab.href
+                  ? "default"
+                  : "ghost"
+              }
+              className="w-full justify-start"
+              asChild
+            >
+              <Link href={tab.href}>
+                <tab.Icon className="h-4 w-4 mr-2" />
+                {tab.name}
+              </Link>
+            </Button>
+          );
+        })}
       </div>
     </div>
   );
