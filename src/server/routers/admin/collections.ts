@@ -34,7 +34,6 @@ export const collectionsAdminRouter = router({
           price: input.price,
           collectionId: input.collectionId,
           description: input.description,
-          rating: input.rating,
           inventory: input.inventory,
           images: {
             create: input.images.map((imageUrl) => ({

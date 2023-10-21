@@ -82,7 +82,6 @@ model Product {
   collection   ProductCollection? @relation(fields: [collectionId], references: [id])
   price        Float
   inventory    Int                @default(0)
-  rating       Float              @default(0)
   images       Image[]
   options      ProductOption[]
 

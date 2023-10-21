@@ -1,6 +1,17 @@
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import LayoutAdmin from "@/components/layouts/admin";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,35 +32,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { formatPrice } from "@/lib/utils";
 import { NextPageWithLayout } from "@/pages/_app";
+import { Product } from "@/types/admin";
 import { trpc } from "@/utils/trpc";
-import { PRODUCT_STATUS } from "@prisma/client";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 import { toast } from "sonner";
 
-interface Product {
-  id: string;
-  name: string;
-  description: string | null;
-  status: PRODUCT_STATUS;
-  createdAt: string;
-  updatedAt: string;
-  collectionId: string | null;
-  price: number;
-  inventory: number;
-  rating: number;
-  collection: {
-    id: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
-}
-
 const Page: NextPageWithLayout = () => {
-  const { data, isLoading, isError, isRefetching } =
-    trpc.admin.products.get.useQuery();
+  const { data } = trpc.admin.products.get.useQuery();
   const utils = trpc.useContext();
 
   const deleteProductMutation = trpc.admin.products.delete.useMutation({
@@ -116,12 +108,6 @@ const Page: NextPageWithLayout = () => {
       ),
     },
     {
-      accessorKey: "rating",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Rating" />
-      ),
-    },
-    {
       id: "actions",
       cell: ({ row }) => (
         <DropdownMenu>
@@ -136,17 +122,39 @@ const Page: NextPageWithLayout = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[160px]">
             <DropdownMenuItem asChild>
-              <Link href={`#`}>Edit</Link>
+              <Link href={`/admin/products/${row.original.id}`}>Edit</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href={`#`}>View</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => deleteProductMutation.mutate(row.original.id)}
-            >
-              Delete
-              <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
+            <DropdownMenuItem asChild>
+              <AlertDialog>
+                <AlertDialogTrigger className="w-full text-left hover:bg-red-100 hover:text-red-600 cursor-default select-none rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 ">
+                  Delete
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Are you absolutely sure?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete
+                      your account and remove your data from our servers.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() =>
+                        deleteProductMutation.mutate(row.original.id)
+                      }
+                    >
+                      Continue
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

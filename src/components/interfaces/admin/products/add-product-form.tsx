@@ -33,29 +33,20 @@ import { useRouter } from "next/router";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-interface FormValues {
-  name: string;
-  description: string;
-  price: number;
-  collectionId: string;
-  images: File | undefined;
-  inventory: number;
-  rating: number;
-}
-
 const formSchema = z.object({
   name: z.string().min(1, {
     message: "Must be at least 1 character",
   }),
-  description: z.string().optional(),
-  price: z.string().regex(/^\d+(\.\d{1,2})?$/, {
-    message: "Must be a valid price",
-  }),
+  description: z.string(),
+  price: z.number(),
   collectionId: z.string().min(1, {
     message: "Collection is required",
   }),
   inventory: z.number(),
+  images: z.unknown(),
 });
+
+type Inputs = z.infer<typeof formSchema> & { images: string[] };
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
@@ -78,14 +69,14 @@ export function AddProductForm() {
 
   const { data } = trpc.admin.collections.get.useQuery();
 
-  const form = useForm<FormValues>({
+  const form = useForm<Inputs>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       collectionId: "ba65b4bd-dccc-4844-b8af-2a621bf1a47d",
     },
   });
 
-  async function onSubmit(data: FormValues) {
+  async function onSubmit(data: Inputs) {
     const images = isArrayOfFile(data.images)
       ? await startUpload(data.images).then((res) => {
           const formattedImages = res?.map((image) => ({
@@ -97,17 +88,16 @@ export function AddProductForm() {
         })
       : null;
 
+    console.log({ data, images });
+
     addProductMutation.mutate({
       name: data.name,
       description: data.description,
       collectionId: data.collectionId,
       price: data.price,
       inventory: data.inventory,
-      rating: data.rating,
       images: images?.map((item) => item.url) ?? [],
     });
-
-    console.log({ data, images });
   }
 
   return (
@@ -141,53 +131,36 @@ export function AddProductForm() {
             message={form.formState.errors.description?.message}
           />
         </FormItem>
-        <div className="flex flex-col items-start gap-6 sm:flex-row">
-          <FormItem className="w-full">
-            <FormLabel>Rating</FormLabel>
-            <FormControl>
-              <Input
-                type="number"
-                inputMode="numeric"
-                placeholder="Type product rating here."
-                {...form.register("rating", {
-                  valueAsNumber: true,
-                })}
-              />
-            </FormControl>
-            <UncontrolledFormMessage
-              message={form.formState.errors.rating?.message}
-            />
-          </FormItem>
-          <FormField
-            control={form.control}
-            name="collectionId"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Collection</FormLabel>
-                <FormControl>
-                  <Select
-                    value={field.value}
-                    onValueChange={(value: typeof field.value) =>
-                      field.onChange(value)
-                    }
-                  >
-                    <SelectTrigger className="capitalize">
-                      <SelectValue placeholder={field.value} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {data?.collections.map((collection) => (
-                        <SelectItem key={collection.id} value={collection.id}>
-                          {collection.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="collectionId"
+          render={({ field }) => (
+            <FormItem className="w-full">
+              <FormLabel>Collection</FormLabel>
+              <FormControl>
+                <Select
+                  value={field.value}
+                  onValueChange={(value: typeof field.value) =>
+                    field.onChange(value)
+                  }
+                >
+                  <SelectTrigger className="capitalize">
+                    <SelectValue placeholder={field.value} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {data?.collections.map((collection) => (
+                      <SelectItem key={collection.id} value={collection.id}>
+                        {collection.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="flex flex-col items-start gap-6 sm:flex-row">
           <FormItem className="w-full">
             <FormLabel>Price</FormLabel>
@@ -257,9 +230,7 @@ export function AddProductForm() {
         </FormItem>
 
         <Button
-          // onClick={() =>
-          //   void form.trigger(["name", "description", "price", "inventory"])
-          // }
+          type="submit"
           className="w-fit"
           disabled={addProductMutation.isLoading}
         >
