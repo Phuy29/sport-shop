@@ -125,7 +125,7 @@ const Page: NextPageWithLayout = () => {
               <Link href={`/admin/products/${row.original.id}`}>Edit</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href={`#`}>View</Link>
+              <Link href={`/store/products/${row.original.id}`}>View</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>

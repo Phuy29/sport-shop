@@ -40,3 +40,7 @@ export function isArrayOfFile(files: unknown): files is File[] {
   if (!isArray) return false;
   return files.every((file) => file instanceof File);
 }
+
+export function truncate(str: string, length: number) {
+  return str.length > length ? `${str.substring(0, length)}...` : str;
+}

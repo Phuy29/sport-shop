@@ -12,7 +12,7 @@ export async function getServerSideProps({
     | undefined;
 
   if (!session) {
-    return { redirect: { permanent: false, destination: "/auth/signin" } };
+    return { redirect: { permanent: false, destination: "/store" } };
   }
 
   const role = session.user.role;

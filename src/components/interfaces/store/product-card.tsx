@@ -18,10 +18,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Icons } from "@/components/icons";
-import { Product } from "@prisma/client";
+import { Image as ProductImage, Product } from "@prisma/client";
 
 interface ProductCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  product: Pick<Product, "id" | "name" | "price" | "inventory">;
+  product: Pick<Product, "id" | "name" | "price" | "inventory"> & {
+    images: Pick<ProductImage, "id" | "url">[];
+  };
   variant?: "default" | "switchable";
   isAddedToCart?: boolean;
   onSwitch?: () => Promise<void>;
@@ -42,20 +44,33 @@ export function ProductCard({
       className={cn("h-full overflow-hidden rounded-sm", className)}
       {...props}
     >
-      <Link aria-label={product.name} href={`/product/${product.id}`}>
+      <Link aria-label={product.name} href={`/store/products/${product.id}`}>
         <CardHeader className="border-b p-0">
           <AspectRatio ratio={4 / 3}>
-            <div
-              aria-label="Placeholder"
-              role="img"
-              aria-roledescription="placeholder"
-              className="flex h-full w-full items-center justify-center bg-secondary"
-            >
-              <Icons.placeholder
-                className="h-9 w-9 text-muted-foreground"
-                aria-hidden="true"
+            {product.images.length ? (
+              <Image
+                src={
+                  product.images[0].url ?? "/images/product-placeholder.webp"
+                }
+                alt={"alt"}
+                className="object-cover"
+                sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, (min-width: 475px) 50vw, 100vw"
+                fill
+                loading="lazy"
               />
-            </div>
+            ) : (
+              <div
+                aria-label="Placeholder"
+                role="img"
+                aria-roledescription="placeholder"
+                className="flex h-full w-full items-center justify-center bg-secondary"
+              >
+                <Icons.placeholder
+                  className="h-9 w-9 text-muted-foreground"
+                  aria-hidden="true"
+                />
+              </div>
+            )}
           </AspectRatio>
         </CardHeader>
         <span className="sr-only">{product.name}</span>

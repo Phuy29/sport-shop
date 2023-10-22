@@ -1,3 +1,4 @@
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { AddProductForm } from "@/components/interfaces/admin/products/add-product-form";
 import { UpdateProductForm } from "@/components/interfaces/admin/products/edit-product-form";
 import LayoutAdmin from "@/components/layouts/admin";
@@ -23,6 +24,19 @@ const Page: NextPageWithLayout = () => {
   return (
     <>
       <Card>
+        <Breadcrumbs
+          className="pt-6 px-6"
+          segments={[
+            {
+              title: "Products",
+              href: "/admin/products",
+            },
+            {
+              title: "Edit Product",
+              href: `/admin/product/${product?.id}`,
+            },
+          ]}
+        />
         <CardHeader>
           <CardTitle>Edit product</CardTitle>
           <CardDescription>
