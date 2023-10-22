@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/card";
 import { Icons } from "@/components/icons";
 import { Image as ProductImage, Product } from "@prisma/client";
+import { useCartStore } from "@/stores/cart";
 
 interface ProductCardProps extends React.HTMLAttributes<HTMLDivElement> {
   product: Pick<Product, "id" | "name" | "price" | "inventory"> & {
@@ -37,7 +38,10 @@ export function ProductCard({
   className,
   ...props
 }: ProductCardProps) {
-  const [isPending, startTransition] = React.useTransition();
+  const cartsStore = useCartStore((state) => ({
+    carts: state.carts,
+    addProduct: state.addProduct,
+  }));
 
   return (
     <Card
@@ -89,15 +93,15 @@ export function ProductCard({
             aria-label="Add to cart"
             size="sm"
             className="h-8 w-full rounded-sm"
-            onClick={() => {}}
-            disabled={isPending}
+            onClick={() => {
+              cartsStore.addProduct({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.images[0].url,
+              });
+            }}
           >
-            {isPending && (
-              <Icons.spinner
-                className="mr-2 h-4 w-4 animate-spin"
-                aria-hidden="true"
-              />
-            )}
             Add to cart
           </Button>
         ) : (
@@ -106,18 +110,15 @@ export function ProductCard({
             size="sm"
             className="h-8 w-full rounded-sm"
             onClick={() => {
-              startTransition(async () => {
-                await onSwitch?.();
+              cartsStore.addProduct({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.images[0].url,
               });
             }}
-            disabled={isPending}
           >
-            {isPending ? (
-              <Icons.spinner
-                className="mr-2 h-4 w-4 animate-spin"
-                aria-hidden="true"
-              />
-            ) : isAddedToCart ? (
+            {isAddedToCart ? (
               <CheckIcon className="mr-2 h-4 w-4" aria-hidden="true" />
             ) : (
               <PlusIcon className="mr-2 h-4 w-4" aria-hidden="true" />
