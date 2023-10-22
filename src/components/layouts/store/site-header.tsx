@@ -23,10 +23,25 @@ import { MainNav } from "./main-nav";
 import { useSession } from "next-auth/react";
 import { USER_ROLE } from "@prisma/client";
 import { signOut } from "next-auth/react";
+import { useCartStore } from "@/stores/cart";
+import { CartSheet } from "@/components/interfaces/store/cart-sheet";
+import { Badge } from "@/components/ui/badge";
+import { Icons } from "@/components/icons";
+import { useRouter } from "next/router";
 
-export function SiteHeader() {
+export default function SiteHeader() {
+  const router = useRouter();
   const session = useSession();
   const user = session.data?.user;
+
+  const cartStore = useCartStore((state) => ({
+    carts: state.carts,
+  }));
+
+  const totalQuantity = cartStore.carts.reduce(
+    (acc, carts) => acc + carts.quantity,
+    0
+  );
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background">
@@ -34,6 +49,23 @@ export function SiteHeader() {
         <MainNav items={siteConfig.mainNav} />
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-2">
+            <Button
+              aria-label="Open cart"
+              variant="outline"
+              size="icon"
+              className="relative"
+              onClick={() => router.push("/store/carts")}
+            >
+              {totalQuantity > 0 && (
+                <Badge
+                  variant="secondary"
+                  className="absolute -right-2 -top-2 h-6 w-6 justify-center rounded-full p-2.5"
+                >
+                  {totalQuantity}
+                </Badge>
+              )}
+              <Icons.cart className="h-4 w-4" aria-hidden="true" />
+            </Button>
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
