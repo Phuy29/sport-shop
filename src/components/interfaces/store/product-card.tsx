@@ -38,14 +38,23 @@ export function ProductCard({
   className,
   ...props
 }: ProductCardProps) {
+  const cartsStore = useCartStore((state) => ({
+    addProduct: state.addProduct,
+  }));
+
   return (
-    <Card className={cn("h-full overflow-hidden rounded-sm", className)} {...props}>
+    <Card
+      className={cn("h-full overflow-hidden rounded-sm", className)}
+      {...props}
+    >
       <Link aria-label={product.name} href={`/store/products/${product.id}`}>
         <CardHeader className="border-b p-0">
           <AspectRatio ratio={4 / 3}>
             {product.images.length ? (
               <Image
-                src={product.images[0].url ?? "/images/product-placeholder.webp"}
+                src={
+                  product.images[0].url ?? "/images/product-placeholder.webp"
+                }
                 alt={"alt"}
                 className="object-cover"
                 sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, (min-width: 475px) 50vw, 100vw"
