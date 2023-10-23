@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/card";
 import { Icons } from "@/components/icons";
 import { Image as ProductImage, Product } from "@prisma/client";
+import { useCartStore } from "@/stores/cart";
 
 interface ProductCardProps extends React.HTMLAttributes<HTMLDivElement> {
   product: Pick<Product, "id" | "name" | "price" | "inventory"> & {
@@ -37,21 +38,14 @@ export function ProductCard({
   className,
   ...props
 }: ProductCardProps) {
-  const [isPending, startTransition] = React.useTransition();
-
   return (
-    <Card
-      className={cn("h-full overflow-hidden rounded-sm", className)}
-      {...props}
-    >
+    <Card className={cn("h-full overflow-hidden rounded-sm", className)} {...props}>
       <Link aria-label={product.name} href={`/store/products/${product.id}`}>
         <CardHeader className="border-b p-0">
           <AspectRatio ratio={4 / 3}>
             {product.images.length ? (
               <Image
-                src={
-                  product.images[0].url ?? "/images/product-placeholder.webp"
-                }
+                src={product.images[0].url ?? "/images/product-placeholder.webp"}
                 alt={"alt"}
                 className="object-cover"
                 sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, (min-width: 475px) 50vw, 100vw"
@@ -89,15 +83,15 @@ export function ProductCard({
             aria-label="Add to cart"
             size="sm"
             className="h-8 w-full rounded-sm"
-            onClick={() => {}}
-            disabled={isPending}
+            onClick={() => {
+              cartsStore.addProduct({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.images[0].url,
+              });
+            }}
           >
-            {isPending && (
-              <Icons.spinner
-                className="mr-2 h-4 w-4 animate-spin"
-                aria-hidden="true"
-              />
-            )}
             Add to cart
           </Button>
         ) : (
@@ -106,18 +100,10 @@ export function ProductCard({
             size="sm"
             className="h-8 w-full rounded-sm"
             onClick={() => {
-              startTransition(async () => {
-                await onSwitch?.();
-              });
+              // Thêm mã xử lý tại đây
             }}
-            disabled={isPending}
           >
-            {isPending ? (
-              <Icons.spinner
-                className="mr-2 h-4 w-4 animate-spin"
-                aria-hidden="true"
-              />
-            ) : isAddedToCart ? (
+            {isAddedToCart ? (
               <CheckIcon className="mr-2 h-4 w-4" aria-hidden="true" />
             ) : (
               <PlusIcon className="mr-2 h-4 w-4" aria-hidden="true" />
