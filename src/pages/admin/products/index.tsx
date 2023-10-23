@@ -21,7 +21,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,7 +44,7 @@ const Page: NextPageWithLayout = () => {
 
   const deleteProductMutation = trpc.admin.products.delete.useMutation({
     onSuccess: () => {
-      toast.success("Product deleted!");
+      toast.success("Collection deleted!");
       utils.admin.products.get.invalidate();
     },
   });
