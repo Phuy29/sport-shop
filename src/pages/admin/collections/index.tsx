@@ -17,11 +17,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { NextPageWithLayout } from "@/pages/_app";
 import { trpc } from "@/utils/trpc";
-import { Product, ProductCollection } from "@prisma/client";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 import { format } from "date-fns";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 interface Collection {
   name: string;
@@ -39,6 +50,14 @@ interface Collection {
 
 const Page: NextPageWithLayout = () => {
   const { data } = trpc.admin.collections.get.useQuery();
+  const utils = trpc.useContext();
+
+  const deleteCollectionMutation = trpc.admin.collections.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Collection deleted!");
+      utils.admin.collections.get.invalidate();
+    },
+  });
 
   const columns: ColumnDef<Collection>[] = [
     {
@@ -90,9 +109,36 @@ const Page: NextPageWithLayout = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[160px]">
             <DropdownMenuItem asChild>
-              <Link href={`#`}>Edit</Link>
+              <Link href={`/admin/collections/${row.original.id}`}>Edit</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>Delete</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <AlertDialog>
+                <AlertDialogTrigger className="w-full text-left hover:bg-red-100 hover:text-red-600 cursor-default select-none rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 ">
+                  Delete
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Are you absolutely sure?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete
+                      your account and remove your data from our servers.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => {
+                        deleteCollectionMutation.mutate(row.original.id);
+                      }}
+                    >
+                      Continue
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       ),
