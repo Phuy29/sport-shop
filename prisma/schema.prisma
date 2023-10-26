@@ -84,6 +84,7 @@ model Product {
   inventory    Int                @default(0)
   images       Image[]
   options      ProductOption[]
+  orderItem    OrderItem[]
 
   @@index([collectionId])
 }
@@ -137,14 +138,20 @@ model Image {
 }
 
 model Order {
-  id          String       @id @default(uuid())
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  status      ORDER_STATUS @default(PENDING)
-  shippingFee Float?
-  userId      String?
-  user        User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items       OrderItem[]
+  id                        String       @id @default(uuid())
+  createdAt                 DateTime     @default(now())
+  updatedAt                 DateTime     @updatedAt
+  isPaid                    Boolean      @default(false)
+  phone                     String       @default("")
+  address                   String       @default("")
+  status                    ORDER_STATUS @default(PENDING)
+  userId                    String?
+  user                      User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items                     OrderItem[]
+  amount                    Float        @default(0)
+  quantity                  Int          @default(0)
+  stripePaymentIntentId     String?
+  stripePaymentIntentStatus String?
 
   @@index([userId])
 }
@@ -155,11 +162,15 @@ model OrderItem {
   updatedAt        DateTime        @updatedAt
   orderId          String?
   order            Order?          @relation(fields: [orderId], references: [id])
+  productId        String // Foreign Key to Product
+  product          Product         @relation(fields: [productId], references: [id])
+  quantity         Int
   productVariantId String?
   productVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])
 
   @@index([orderId])
   @@index([productVariantId])
+  @@index([productId])
 }
 
 enum ORDER_STATUS {

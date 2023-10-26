@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, Folder, Tag } from "lucide-react";
+import { BarChart3, Folder, Tag, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/router";
@@ -24,6 +24,11 @@ export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
       href: "/admin/collections",
       Icon: Folder,
     },
+    {
+      name: "Orders",
+      href: "/admin/orders",
+      Icon: ShoppingCart,
+    },
   ];
 
   return (
@@ -33,7 +38,9 @@ export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
       </div>
       <div className="my-4 flex flex-col px-2">
         <h1 className="text-gray-400 text-xs font-medium">Store</h1>
-        <h2 className="text-gray-900 font-medium">Sport shop</h2>
+        <Button variant="link" className="inline-block" asChild>
+          <Link href={"/store"}>Sport shop</Link>
+        </Button>
       </div>
       <div className="space-y-2 py-4">
         {tabs.map((tab, index) => {
