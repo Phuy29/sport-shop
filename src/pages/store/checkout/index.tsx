@@ -8,7 +8,6 @@ import {
   PageHeaderDescription,
   PageHeaderHeading,
 } from "@/components/page-header";
-import { ProductCard } from "@/components/interfaces/store/product-card";
 
 const Page: NextPageWithLayout = () => {
   return (

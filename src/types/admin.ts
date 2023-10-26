@@ -1,4 +1,4 @@
-import { PRODUCT_STATUS } from "@prisma/client";
+import { ORDER_STATUS, PRODUCT_STATUS } from "@prisma/client";
 
 export interface Product {
   name: string;
@@ -27,4 +27,15 @@ export interface Collection {
   name: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface Order {
+  id: string;
+  status: ORDER_STATUS;
+  createdAt: string;
+  updatedAt: string;
+  isPaid: boolean;
+  phone: string;
+  address: string;
+  userId: string | null;
 }

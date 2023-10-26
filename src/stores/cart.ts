@@ -17,6 +17,7 @@ type CartState = {
   addOneItem: (id: string) => void;
   removeOneItem: (id: string) => void;
   setQuantity: (id: string, quantity: number) => void;
+  clear: () => void;
 };
 
 export const useCartStore = create<CartState>()(
@@ -87,6 +88,11 @@ export const useCartStore = create<CartState>()(
               }
               return c;
             }),
+          }));
+        },
+        clear: () => {
+          set((state) => ({
+            carts: [],
           }));
         },
         isLoading: false,

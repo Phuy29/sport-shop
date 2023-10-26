@@ -20,17 +20,12 @@ import { Separator } from "@/components/ui/separator";
 import { cn, formatPrice } from "@/lib/utils";
 import { NextPageWithLayout } from "@/pages/_app";
 import { useCartStore } from "@/stores/cart";
+import { trpc } from "@/utils/trpc";
 import { MinusIcon, PlusIcon, TrashIcon } from "@radix-ui/react-icons";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
-
-const CheckoutButtonNoSSR = dynamic(
-  () => import("@/components/interfaces/store/checkout-button"),
-  {
-    ssr: false,
-  }
-);
+import { useRouter } from "next/router";
+import { toast } from "sonner";
 
 const Page: NextPageWithLayout = () => {
   const cartStore = useCartStore((state) => ({
@@ -39,7 +34,33 @@ const Page: NextPageWithLayout = () => {
     setQuantity: state.setQuantity,
     addOneItem: state.addOneItem,
     removeOneItem: state.removeOneItem,
+    removeProducts: state.removeProducts,
   }));
+
+  const router = useRouter();
+
+  const checkoutSessionMutation =
+    trpc.store.stripe.createCheckoutSession.useMutation({
+      onSuccess: async (data) => {
+        if (!data.checkoutUrl) return;
+        router.push(data.checkoutUrl);
+        toast.success("Redirecting to checkout...");
+      },
+      onError: async (err) => {
+        toast.error(err.message);
+      },
+    });
+
+  const handleCheckout = () => {
+    checkoutSessionMutation.mutate(
+      cartStore.carts.map((c) => ({
+        id: c.product.id,
+        name: c.product.name,
+        price: c.product.price,
+        quantity: c.quantity,
+      }))
+    );
+  };
 
   return (
     <Shell>
@@ -56,7 +77,13 @@ const Page: NextPageWithLayout = () => {
         <Card>
           <CardHeader className="flex flex-row items-center space-x-4 py-4">
             <CardTitle className="flex-1">Shopping Carts</CardTitle>
-            <CheckoutButtonNoSSR />
+            <Button
+              aria-label="Add to order"
+              className="flex-none"
+              onClick={handleCheckout}
+            >
+              Checkout
+            </Button>
           </CardHeader>
           <Separator className="mb-4" />
           <CardContent className="pb-6 px-6">

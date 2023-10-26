@@ -3,6 +3,7 @@ import type { inferAsyncReturnType } from "@trpc/server";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { getServerAuthSession } from "@/lib/next-auth";
 import prisma from "@/lib/prisma";
+import { stripe } from "@/lib/stripe";
 
 type CreateContextOptions = {
   session: Session | null;
@@ -17,6 +18,7 @@ export const createContextInner = async (opts: CreateContextOptions) => {
   return {
     session: opts.session,
     prisma,
+    stripe,
   };
 };
 
