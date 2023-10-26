@@ -38,4 +38,18 @@ export interface Order {
   phone: string;
   address: string;
   userId: string | null;
+  stripePaymentIntentId: string | null;
+  stripePaymentIntentStatus: string | null;
+  items: OrderItem[];
+}
+
+export interface OrderItem {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  orderId: string | null;
+  productId: string;
+  product: Omit<Product, "images" | "collection">;
+  quantity: number;
+  productVariantId: string | null;
 }

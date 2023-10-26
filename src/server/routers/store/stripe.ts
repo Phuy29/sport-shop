@@ -37,6 +37,8 @@ export const stripeRouter = router({
         data: {
           userId: ctx.session?.user?.id,
           isPaid: false,
+          quantity: input.reduce((acc, item) => acc + item.quantity, 0),
+          amount: input.reduce((acc, item) => acc + item.price, 0),
           items: {
             create: input.map((product) => ({
               productId: product.id,

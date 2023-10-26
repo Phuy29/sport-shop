@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, Folder, Tag } from "lucide-react";
+import { BarChart3, Folder, Tag, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/router";
@@ -27,7 +27,7 @@ export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
     {
       name: "Orders",
       href: "/admin/orders",
-      Icon: Folder,
+      Icon: ShoppingCart,
     },
   ];
 

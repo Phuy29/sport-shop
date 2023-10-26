@@ -16,6 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { formatPrice } from "@/lib/utils";
 import { NextPageWithLayout } from "@/pages/_app";
 import { Order, Product } from "@/types/admin";
 import { trpc } from "@/utils/trpc";
@@ -68,22 +69,26 @@ const Page: NextPageWithLayout = () => {
         );
       },
     },
-    // {
-    //   accessorKey: "id",
-    //   header: ({ column }) => (
-    //     <DataTableColumnHeader column={column} title="Customer" />
-    //   ),
-    //   cell: ({ row }) => {
-    //     return row.original.userId;
-    //   },
-    // },
+    {
+      accessorKey: "id",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Total Price" />
+      ),
+      cell: ({ row }) => {
+        return formatPrice(
+          row.original.items.reduce((total, item) => {
+            return total + Number(item.product.price);
+          }, 0)
+        );
+      },
+    },
     {
       accessorKey: "id",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Create At" />
       ),
       cell: ({ row }) => {
-        return format(new Date(row.original.createdAt), "dd MM yyyy");
+        return format(new Date(row.original.createdAt), "dd MMM yyyy");
       },
     },
     {
