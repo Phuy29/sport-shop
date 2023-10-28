@@ -2,6 +2,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { AddProductForm } from "@/components/interfaces/admin/products/add-product-form";
 import { UpdateProductForm } from "@/components/interfaces/admin/products/edit-product-form";
 import LayoutAdmin from "@/components/layouts/admin";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { NextPageWithLayout } from "@/pages/_app";
 import { trpc } from "@/utils/trpc";
+import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/router";
 
 const Page: NextPageWithLayout = () => {
@@ -23,20 +25,16 @@ const Page: NextPageWithLayout = () => {
 
   return (
     <>
-      <Card>
-        <Breadcrumbs
-          className="pt-6 px-6"
-          segments={[
-            {
-              title: "Products",
-              href: "/admin/products",
-            },
-            {
-              title: "Edit Product",
-              href: `/admin/product/${product?.id}`,
-            },
-          ]}
-        />
+      <Button
+        variant="ghost"
+        className="items-center"
+        onClick={() => router.back()}
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Back to products
+      </Button>
+
+      <Card className="mt-2">
         <CardHeader>
           <CardTitle>Edit product</CardTitle>
           <CardDescription>

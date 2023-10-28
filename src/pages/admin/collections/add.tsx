@@ -17,14 +17,18 @@ const Page: NextPageWithLayout = () => {
 
   return (
     <>
-      <Card>
+      <Button
+        variant="ghost"
+        className="items-center"
+        onClick={() => router.back()}
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Back to Collections
+      </Button>
+
+      <Card className="mt-2">
         <CardHeader>
-          <div className="flex gap-2 items-center">
-            <Button variant="ghost" size="icon" onClick={() => router.back()}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <CardTitle>Add collection</CardTitle>
-          </div>
+          <CardTitle>Add collection</CardTitle>
         </CardHeader>
         <CardContent>
           <AddCollectionForm />

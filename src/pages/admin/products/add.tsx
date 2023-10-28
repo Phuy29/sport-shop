@@ -1,6 +1,7 @@
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { AddProductForm } from "@/components/interfaces/admin/products/add-product-form";
 import LayoutAdmin from "@/components/layouts/admin";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,29 +9,32 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { NextPageWithLayout } from "@/pages/_app";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 const Page: NextPageWithLayout = () => {
+  const router = useRouter();
+
   return (
     <>
-      <Card>
-        <Breadcrumbs
-          className="pt-6 px-6"
-          segments={[
-            {
-              title: "Products",
-              href: "/admin/products",
-            },
-            {
-              title: "New Product",
-              href: `/admin/product/add`,
-            },
-          ]}
-        />
+      <Button
+        variant="ghost"
+        className="items-center"
+        onClick={() => router.back()}
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Back to products
+      </Button>
+
+      <Card className="mt-2">
         <CardHeader>
           <CardTitle>Add product</CardTitle>
           <CardDescription>Add a new product to your store</CardDescription>
         </CardHeader>
+
         <CardContent>
           <AddProductForm />
         </CardContent>

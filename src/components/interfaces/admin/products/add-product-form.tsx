@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -28,10 +29,11 @@ import { FileDialog, FileWithPreview } from "./file-dialog";
 import { Zoom } from "./zoom-image";
 import { generateReactHelpers } from "@uploadthing/react/hooks";
 import { OurFileRouter } from "@/server/uploadthing";
-import { isArrayOfFile } from "@/lib/utils";
 import { useRouter } from "next/router";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Separator } from "@/components/ui/separator";
+import { ProductOptions } from "./product-options-form";
+import { ProductVariants } from "./product-variants-form";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -44,9 +46,23 @@ const formSchema = z.object({
   }),
   inventory: z.number(),
   images: z.unknown(),
+  options: z.array(
+    z.object({
+      name: z.string(),
+      values: z.array(z.string()),
+    })
+  ),
+  variants: z.array(
+    z.object({
+      name: z.string(),
+      price: z.number(),
+      inventory: z.number(),
+      options: z.array(z.object({ name: z.string(), value: z.string() })),
+    })
+  ),
 });
 
-type Inputs = z.infer<typeof formSchema> & { images: string[] };
+export type Inputs = z.infer<typeof formSchema> & { images: string[] };
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
@@ -70,42 +86,42 @@ export function AddProductForm() {
   const { data } = trpc.admin.collections.get.useQuery();
 
   const form = useForm<Inputs>({
-    resolver: zodResolver(formSchema),
+    // resolver: zodResolver(formSchema),
     defaultValues: {
-      collectionId: "ba65b4bd-dccc-4844-b8af-2a621bf1a47d",
+      options: [{ name: "", values: [] }],
     },
   });
 
   async function onSubmit(data: Inputs) {
-    const images = isArrayOfFile(data.images)
-      ? await startUpload(data.images).then((res) => {
-          const formattedImages = res?.map((image) => ({
-            id: image.key,
-            name: image.key.split("_")[1] ?? image.key,
-            url: image.url,
-          }));
-          return formattedImages ?? null;
-        })
-      : null;
-
-    console.log({ data, images });
-
-    addProductMutation.mutate({
-      name: data.name,
-      description: data.description,
-      collectionId: data.collectionId,
-      price: data.price,
-      inventory: data.inventory,
-      images: images?.map((item) => item.url) ?? [],
-    });
+    console.log({ data });
+    // const images = isArrayOfFile(data.images)
+    //   ? await startUpload(data.images).then((res) => {
+    //       const formattedImages = res?.map((image) => ({
+    //         id: image.key,
+    //         name: image.key.split("_")[1] ?? image.key,
+    //         url: image.url,
+    //       }));
+    //       return formattedImages ?? null;
+    //     })
+    //   : null;
+    // addProductMutation.mutate({
+    //   name: data.name,
+    //   description: data.description,
+    //   collectionId: data.collectionId,
+    //   price: data.price,
+    //   inventory: data.inventory,
+    //   images: images?.map((item) => item.url) ?? [],
+    // });
   }
 
   return (
     <Form {...form}>
       <form
-        className="grid w-full max-w-2xl gap-5"
+        className="grid w-full max-w-4xl mx-auto gap-5"
         onSubmit={(...args) => void form.handleSubmit(onSubmit)(...args)}
       >
+        <Separator />
+
         <FormItem>
           <FormLabel>Name</FormLabel>
           <FormControl>
@@ -119,6 +135,7 @@ export function AddProductForm() {
             message={form.formState.errors.name?.message}
           />
         </FormItem>
+
         <FormItem>
           <FormLabel>Description</FormLabel>
           <FormControl>
@@ -131,6 +148,7 @@ export function AddProductForm() {
             message={form.formState.errors.description?.message}
           />
         </FormItem>
+
         <FormField
           control={form.control}
           name="collectionId"
@@ -161,40 +179,20 @@ export function AddProductForm() {
           )}
         />
 
-        <div className="flex flex-col items-start gap-6 sm:flex-row">
-          <FormItem className="w-full">
-            <FormLabel>Price</FormLabel>
-            <FormControl>
-              <Input
-                type="number"
-                inputMode="numeric"
-                placeholder="Type product price here."
-                {...form.register("price", {
-                  valueAsNumber: true,
-                })}
-              />
-            </FormControl>
-            <UncontrolledFormMessage
-              message={form.formState.errors.price?.message}
-            />
-          </FormItem>
-          <FormItem className="w-full">
-            <FormLabel>Inventory</FormLabel>
-            <FormControl>
-              <Input
-                type="number"
-                inputMode="numeric"
-                placeholder="Type product inventory here."
-                {...form.register("inventory", {
-                  valueAsNumber: true,
-                })}
-              />
-            </FormControl>
-            <UncontrolledFormMessage
-              message={form.formState.errors.inventory?.message}
-            />
-          </FormItem>
+        <Separator />
+
+        <div>
+          <h1 className="font-semibold text-lg">Variants</h1>
+          <p className="text-sm text-slate-500">
+            Add variations of this product.
+          </p>
+
+          <ProductOptions />
+
+          <ProductVariants />
         </div>
+
+        <Separator />
 
         <FormItem className="flex w-full flex-col gap-1.5">
           <FormLabel>Images</FormLabel>
