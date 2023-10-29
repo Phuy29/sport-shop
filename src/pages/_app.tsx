@@ -3,8 +3,8 @@ import type { ReactElement, ReactNode } from "react";
 import type { NextPage } from "next";
 import type { AppProps } from "next/app";
 import { SessionProvider } from "next-auth/react";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { trpc } from "../utils/trpc";
+import { Toaster } from "sonner";
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -22,6 +22,7 @@ function App({
 
   return (
     <SessionProvider session={session}>
+      <Toaster />
       {getLayout(<Component {...pageProps} />)}
     </SessionProvider>
   );

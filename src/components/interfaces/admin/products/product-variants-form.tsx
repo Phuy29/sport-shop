@@ -1,12 +1,4 @@
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import React, { useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { Inputs } from "./add-product-form";
@@ -20,14 +12,8 @@ import {
   FormMessage,
   UncontrolledFormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { MoreHorizontal, Pencil, Trash, Trash2 } from "lucide-react";
+
+import { Trash2 } from "lucide-react";
 import { CreateProductVariantDialog } from "./create-product-variant-dialog";
 
 export const ProductVariants = () => {
@@ -76,40 +62,32 @@ export const ProductVariants = () => {
                 />
               </div>
               <div className="flex items-center">
-                <FormField
-                  control={form.control}
-                  name={`variants.${index}.price`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          {...field}
-                          placeholder="Price..."
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...form.register(`variants.${index}.price`, {
+                        valueAsNumber: true,
+                      })}
+                      placeholder="Price..."
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               </div>
               <div className="flex items-center">
-                <FormField
-                  control={form.control}
-                  name={`variants.${index}.inventory`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          {...field}
-                          placeholder="Price..."
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...form.register(`variants.${index}.inventory`, {
+                        valueAsNumber: true,
+                      })}
+                      placeholder="Price..."
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               </div>
               <div className="flex items-center">
                 <Button

@@ -7,7 +7,7 @@ export const ordersRouter = router({
       include: {
         items: {
           include: {
-            product: true,
+            productVariant: true,
           },
         },
       },

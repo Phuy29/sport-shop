@@ -29,17 +29,15 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { formatPrice } from "@/lib/utils";
 import { NextPageWithLayout } from "@/pages/_app";
-import { Product } from "@/types/admin";
-import { trpc } from "@/utils/trpc";
+import { RouterOutputs, trpc } from "@/utils/trpc";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 import { toast } from "sonner";
 
 const Page: NextPageWithLayout = () => {
-  const { data } = trpc.admin.products.get.useQuery();
+  const { data, isLoading } = trpc.admin.products.get.useQuery();
   const utils = trpc.useContext();
 
   const deleteProductMutation = trpc.admin.products.delete.useMutation({
@@ -49,9 +47,11 @@ const Page: NextPageWithLayout = () => {
     },
   });
 
-  if (!data) return <p>Loading...</p>;
+  if (isLoading) return <p>Loading...</p>;
 
-  const columns: ColumnDef<(typeof data)[number]>[] = [
+  const columns: ColumnDef<
+    RouterOutputs["admin"]["products"]["get"][number]
+  >[] = [
     // {
     //   id: "select",
     //   header: ({ table }) => (

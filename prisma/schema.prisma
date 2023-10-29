@@ -72,21 +72,18 @@ model VerificationToken {
 }
 
 model Product {
-  id                 String               @id @default(uuid())
-  name               String
-  description        String?
-  status             PRODUCT_STATUS       @default(DRAFT)
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-  collectionId       String?
-  collection         ProductCollection?   @relation(fields: [collectionId], references: [id])
-  price              Float                @default(0)
-  inventory          Int                  @default(0)
-  images             Image[]
-  options            ProductOption[]
-  variants           ProductVariant[]
-  orderItem          OrderItem[]
-  ProductOptionValue ProductOptionValue[]
+  id           String               @id @default(uuid())
+  name         String
+  description  String?
+  status       PRODUCT_STATUS       @default(DRAFT)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  collectionId String?
+  collection   ProductCollection?   @relation(fields: [collectionId], references: [id])
+  images       Image[]
+  options      ProductOption[]
+  variants     ProductVariant[]
+  optionValue  ProductOptionValue[]
 
   @@index([collectionId])
 }
@@ -180,20 +177,17 @@ model Order {
 }
 
 model OrderItem {
-  id               String          @id @default(uuid())
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  id               String         @id @default(uuid())
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
   orderId          String?
-  order            Order?          @relation(fields: [orderId], references: [id])
-  productId        String?
-  product          Product?        @relation(fields: [productId], references: [id])
+  order            Order?         @relation(fields: [orderId], references: [id])
   quantity         Int
-  productVariantId String?
-  productVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])
+  productVariantId String
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
 
   @@index([orderId])
   @@index([productVariantId])
-  @@index([productId])
 }
 
 enum ORDER_STATUS {

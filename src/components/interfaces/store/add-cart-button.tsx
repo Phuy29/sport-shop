@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/stores/cart";
 import { RouterOutputs } from "@/utils/trpc";
 import { toast } from "sonner";
+import { useRouter } from "next/router";
 
 export function AddToCartButton({
   product,
@@ -12,6 +13,7 @@ export function AddToCartButton({
   product: RouterOutputs["store"]["products"]["getOne"];
   variants: RouterOutputs["store"]["products"]["getOne"]["variants"];
 }) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const cartState = useCartStore((state) => ({
     addProduct: state.addProduct,
@@ -41,6 +43,12 @@ export function AddToCartButton({
             productVariantName: variant.name,
             price: variant.price,
             image: product.images[0].url,
+          });
+          toast("This product has been added to carts", {
+            action: {
+              label: "Go to Cart",
+              onClick: () => router.push("/store/carts"),
+            },
           });
         } else {
           toast("Please select product variant!");
