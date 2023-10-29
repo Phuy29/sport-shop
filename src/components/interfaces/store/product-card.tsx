@@ -1,14 +1,9 @@
-"use client";
-
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { CheckIcon, PlusIcon } from "@radix-ui/react-icons";
-import { toast } from "sonner";
 
 import { cn, formatPrice } from "@/lib/utils";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -18,13 +13,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Icons } from "@/components/icons";
-import { Image as ProductImage, Product } from "@prisma/client";
 import { useCartStore } from "@/stores/cart";
+import { RouterOutputs } from "@/utils/trpc";
 
 interface ProductCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  product: Pick<Product, "id" | "name" | "price" | "inventory"> & {
-    images: Pick<ProductImage, "id" | "url">[];
-  };
+  product: RouterOutputs["store"]["products"]["get"][number];
   variant?: "default" | "switchable";
   isAddedToCart?: boolean;
   onSwitch?: () => Promise<void>;
@@ -77,50 +70,20 @@ export function ProductCard({
           </AspectRatio>
         </CardHeader>
         <span className="sr-only">{product.name}</span>
-      </Link>
-      <Link href={`/product/${product.id}`} tabIndex={-1}>
         <CardContent className="grid gap-2.5 p-4">
           <CardTitle className="line-clamp-1">{product.name}</CardTitle>
           <CardDescription className="line-clamp-2">
-            {formatPrice(product.price)}
+            {product.variants.length === 1 ? (
+              formatPrice(product.variants[0].price)
+            ) : (
+              <>
+                {formatPrice(product.minVariantPrice)} -{" "}
+                {formatPrice(product.maxVariantPrice)}
+              </>
+            )}
           </CardDescription>
         </CardContent>
       </Link>
-      <CardFooter className="p-4">
-        {variant === "default" ? (
-          <Button
-            aria-label="Add to cart"
-            size="sm"
-            className="h-8 w-full rounded-sm"
-            onClick={() => {
-              cartsStore.addProduct({
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                image: product.images[0].url,
-              });
-            }}
-          >
-            Add to cart
-          </Button>
-        ) : (
-          <Button
-            aria-label={isAddedToCart ? "Remove from cart" : "Add to cart"}
-            size="sm"
-            className="h-8 w-full rounded-sm"
-            onClick={() => {
-              // Thêm mã xử lý tại đây
-            }}
-          >
-            {isAddedToCart ? (
-              <CheckIcon className="mr-2 h-4 w-4" aria-hidden="true" />
-            ) : (
-              <PlusIcon className="mr-2 h-4 w-4" aria-hidden="true" />
-            )}
-            {isAddedToCart ? "Added" : "Add to cart"}
-          </Button>
-        )}
-      </CardFooter>
     </Card>
   );
 }

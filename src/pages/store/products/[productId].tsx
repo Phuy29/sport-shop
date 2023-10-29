@@ -5,16 +5,16 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { useRouter } from "next/router";
 import { trpc } from "@/utils/trpc";
 import { Separator } from "@/components/ui/separator";
-import { formatPrice } from "@/lib/utils";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import Image from "next/image";
-import { ProductImage } from "@/components/interfaces/store/product-image";
 import { Icons } from "@/components/icons";
+import { Gallery } from "@/components/interfaces/store/gallery";
+import { VariantSelector } from "@/components/interfaces/store/variant-selector";
+import { Price } from "@/components/interfaces/store/price";
 
 const Page: NextPageWithLayout = () => {
   const router = useRouter();
@@ -40,8 +40,8 @@ const Page: NextPageWithLayout = () => {
         ]}
       />
 
-      <div className="flex flex-col gap-8 md:flex-row md:gap-16">
-        <div className="col-span-4 w-[550px]">
+      <div className="flex flex-col rounded-lg lg:flex-row lg:gap-8 w-full">
+        <div className="h-full w-full basis-full lg:basis-4/6">
           {product.images.length === 0 ? (
             <div
               aria-label="Product Placeholder"
@@ -56,49 +56,33 @@ const Page: NextPageWithLayout = () => {
             </div>
           ) : (
             <>
-              <ProductImage
-                src={product.images[0].url}
-                alt={"alt"}
-                height="h-96"
-                width="w-full"
+              <Gallery
+                images={product.images.map((image) => ({
+                  src: image.url,
+                  altText: "dsads",
+                }))}
               />
-              {product.images.length > 1 && (
-                <>
-                  <div className="flex items-center justify-start gap-2 mt-2 overflow-auto flex-nowrap">
-                    {product.images.slice(1).map((image) => (
-                      <div key={image.id} className="relative h-24 w-24">
-                        <Image
-                          src={image.url}
-                          alt={"alt"}
-                          fill
-                          className="object-cover h-24 w-24"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
             </>
           )}
         </div>
 
-        {/* <ProductImageCarousel
-          className="w-full md:w-1/2"
-          images={product.images.map((item) => item.url)}
-          options={{
-            loop: true,
-          }}
-        /> */}
-        <Separator className="mt-4 md:hidden" />
-        <div className="flex w-full flex-col gap-4 md:w-1/2">
-          <div className="space-y-2">
-            <h2 className="line-clamp-1 text-2xl font-bold">{product.name}</h2>
-            <p className="text-base text-muted-foreground">
-              {formatPrice(product.price)}
-            </p>
+        <div className="basis-full lg:basis-2/6">
+          <div className="mb-6 flex flex-col border-b pb-6 dark:border-neutral-700">
+            <h1 className="mb-2 text-5xl font-medium">{product.name}</h1>
+            <Price
+              variants={product.variants}
+              minVariantPrice={product.minVariantPrice}
+              maxVariantPrice={product.maxVariantPrice}
+            />
           </div>
-          {/* <AddToCartForm productId={productId} /> */}
+
+          <VariantSelector
+            options={product.options}
+            variants={product.variants}
+          />
+
           <Separator className="mt-5" />
+
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="description">
               <AccordionTrigger>Description</AccordionTrigger>

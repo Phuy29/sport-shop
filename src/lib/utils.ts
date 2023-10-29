@@ -44,3 +44,10 @@ export function isArrayOfFile(files: unknown): files is File[] {
 export function truncate(str: string, length: number) {
   return str.length > length ? `${str.substring(0, length)}...` : str;
 }
+
+export const createUrl = (pathname: string, params: URLSearchParams) => {
+  const paramsString = params.toString();
+  const queryString = `${paramsString.length ? "?" : ""}${paramsString}`;
+
+  return `${pathname}${queryString}`;
+};

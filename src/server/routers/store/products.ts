@@ -4,23 +4,33 @@ import { z } from "zod";
 
 export const productsStoreRouter = router({
   get: publicProcedure.query(async ({ ctx }) => {
-    const products = await ctx.prisma.product.findMany({
-      select: {
-        id: true,
-        name: true,
-        price: true,
-        inventory: true,
-        images: {
-          select: {
-            id: true,
-            url: true,
-          },
-        },
+    const result = await ctx.prisma.product.findMany({
+      include: {
+        images: true,
+        options: true,
+        variants: true,
       },
       orderBy: {
         createdAt: "desc",
       },
     });
+
+    const products = result.map((product) => {
+      const productVariantPriceArr = product.variants.map(
+        (variant) => variant.price
+      );
+
+      return {
+        ...product,
+        minVariantPrice: productVariantPriceArr.reduce(function (min, current) {
+          return Math.min(min, current);
+        }, productVariantPriceArr[0]),
+        maxVariantPrice: productVariantPriceArr.reduce(function (max, current) {
+          return Math.max(max, current);
+        }, productVariantPriceArr[0]),
+      };
+    });
+
     return products;
   }),
 
@@ -31,14 +41,44 @@ export const productsStoreRouter = router({
       },
       include: {
         images: true,
+        options: {
+          include: {
+            optionValue: {
+              distinct: "value",
+            },
+          },
+        },
+        variants: {
+          include: {
+            optionValue: {
+              include: {
+                option: true,
+              },
+            },
+          },
+        },
       },
     });
+
     if (!product) {
       throw new TRPCError({
         code: "NOT_FOUND",
         message: "Product not found!",
       });
     }
-    return product;
+
+    const productVariantPriceArr = product.variants.map(
+      (variant) => variant.price
+    );
+
+    return {
+      ...product,
+      minVariantPrice: productVariantPriceArr.reduce(function (min, current) {
+        return Math.min(min, current);
+      }, productVariantPriceArr[0]),
+      maxVariantPrice: productVariantPriceArr.reduce(function (max, current) {
+        return Math.max(max, current);
+      }, productVariantPriceArr[0]),
+    };
   }),
 });
