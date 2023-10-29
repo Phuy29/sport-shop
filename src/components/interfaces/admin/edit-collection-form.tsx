@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Icons } from "@/components/icons";
 
-import { trpc } from "@/utils/trpc";
+import { RouterOutputs, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 const formSchema = z.object({
@@ -29,12 +29,7 @@ const formSchema = z.object({
 type Inputs = z.infer<typeof formSchema>;
 
 interface EditCollectionFormProps {
-  collection: {
-    name: string;
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-  };
+  collection: RouterOutputs["admin"]["collections"]["getOne"];
 }
 
 export default function EditCollectionForm({

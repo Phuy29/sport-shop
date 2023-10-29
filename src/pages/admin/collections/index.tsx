@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { NextPageWithLayout } from "@/pages/_app";
-import { trpc } from "@/utils/trpc";
+import { RouterOutputs, trpc } from "@/utils/trpc";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
@@ -59,7 +59,9 @@ const Page: NextPageWithLayout = () => {
     },
   });
 
-  const columns: ColumnDef<Collection>[] = [
+  const columns: ColumnDef<
+    RouterOutputs["admin"]["collections"]["get"]["collections"][number]
+  >[] = [
     {
       accessorKey: "name",
       header: ({ column }) => (
