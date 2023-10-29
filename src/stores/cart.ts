@@ -1,17 +1,22 @@
-import { Product } from "@prisma/client";
 import { create } from "zustand";
 import { createJSONStorage, devtools, persist } from "zustand/middleware";
 
+interface ProductVariantCart {
+  id: string;
+  productName: string;
+  productVariantName: string;
+  price: number;
+  image: string;
+}
+
 type CartItem = {
-  product: Pick<Product, "id" | "name" | "price"> & { image: string };
+  productVariant: ProductVariantCart;
   quantity: number;
 };
 
 type CartState = {
   carts: CartItem[];
-  addProduct: (
-    product: Pick<Product, "id" | "name" | "price"> & { image: string }
-  ) => void;
+  addProduct: (product: ProductVariantCart) => void;
   removeProduct: (id: string) => void;
   removeProducts: (ids: string[]) => void;
   addOneItem: (id: string) => void;
@@ -27,34 +32,36 @@ export const useCartStore = create<CartState>()(
         carts: [],
         addProduct: (product) => {
           set((state) => ({
-            carts: state.carts.some((c) => c.product.id === product.id)
+            carts: state.carts.some((c) => c.productVariant.id === product.id)
               ? state.carts.map((c) => {
-                  if (c.product.id === product.id) {
+                  if (c.productVariant.id === product.id) {
                     return {
-                      product: c.product,
+                      productVariant: c.productVariant,
                       quantity: c.quantity + 1,
                     };
                   }
 
                   return c;
                 })
-              : [...state.carts, { product, quantity: 1 }],
+              : [...state.carts, { productVariant: product, quantity: 1 }],
           }));
         },
         removeProduct: (id: string) => {
           set((state) => ({
-            carts: state.carts.filter((c) => c.product.id !== id),
+            carts: state.carts.filter((c) => c.productVariant.id !== id),
           }));
         },
         removeProducts: (ids: string[]) => {
           set((state) => ({
-            carts: state.carts.filter((c) => !ids.includes(c.product.id)),
+            carts: state.carts.filter(
+              (c) => !ids.includes(c.productVariant.id)
+            ),
           }));
         },
         addOneItem: (id: string) => {
           set((state) => ({
             carts: state.carts.map((c) => {
-              if (c.product.id === id) {
+              if (c.productVariant.id === id) {
                 return {
                   ...c,
                   quantity: c.quantity + 1,
@@ -67,7 +74,7 @@ export const useCartStore = create<CartState>()(
         removeOneItem: (id: string) => {
           set((state) => ({
             carts: state.carts.map((c) => {
-              if (c.product.id === id) {
+              if (c.productVariant.id === id) {
                 return {
                   ...c,
                   quantity: c.quantity - 1,
@@ -80,7 +87,7 @@ export const useCartStore = create<CartState>()(
         setQuantity: (id: string, quantity: number) => {
           set((state) => ({
             carts: state.carts.map((c) => {
-              if (c.product.id === id) {
+              if (c.productVariant.id === id) {
                 return {
                   ...c,
                   quantity,

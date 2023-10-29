@@ -185,8 +185,8 @@ model OrderItem {
   updatedAt        DateTime        @updatedAt
   orderId          String?
   order            Order?          @relation(fields: [orderId], references: [id])
-  productId        String // Foreign Key to Product
-  product          Product         @relation(fields: [productId], references: [id])
+  productId        String?
+  product          Product?        @relation(fields: [productId], references: [id])
   quantity         Int
   productVariantId String?
   productVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])

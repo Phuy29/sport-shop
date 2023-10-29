@@ -9,7 +9,8 @@ export const stripeRouter = router({
       z.array(
         z.object({
           id: z.string(),
-          name: z.string(),
+          productName: z.string(),
+          productVariantName: z.string(),
           price: z.number(),
           quantity: z.number().min(1),
         })
@@ -22,7 +23,7 @@ export const stripeRouter = router({
           price_data: {
             currency: "USD",
             product_data: {
-              name: product.name,
+              name: `${product.productName} - ${product.productVariantName}`,
             },
             unit_amount: product.price * 100,
           },
@@ -41,8 +42,8 @@ export const stripeRouter = router({
           amount: input.reduce((acc, item) => acc + item.price, 0),
           items: {
             create: input.map((product) => ({
-              productId: product.id,
               quantity: product.quantity,
+              productVariantId: product.id,
             })),
           },
         },

@@ -31,10 +31,6 @@ export function ProductCard({
   className,
   ...props
 }: ProductCardProps) {
-  const cartsStore = useCartStore((state) => ({
-    addProduct: state.addProduct,
-  }));
-
   return (
     <Card
       className={cn("h-full overflow-hidden rounded-sm", className)}

@@ -54,9 +54,10 @@ const Page: NextPageWithLayout = () => {
   const handleCheckout = () => {
     checkoutSessionMutation.mutate(
       cartStore.carts.map((c) => ({
-        id: c.product.id,
-        name: c.product.name,
-        price: c.product.price,
+        productName: c.productVariant.productName,
+        id: c.productVariant.id,
+        productVariantName: c.productVariant.productVariantName,
+        price: c.productVariant.price,
         quantity: c.quantity,
       }))
     );
@@ -89,7 +90,7 @@ const Page: NextPageWithLayout = () => {
           <CardContent className="pb-6 px-6">
             <div className={cn("flex w-full flex-col gap-5")}>
               {cartStore.carts.map((c) => {
-                const product = c.product;
+                const product = c.productVariant;
 
                 return (
                   <div key={product.id} className="space-y-3">
@@ -120,8 +121,11 @@ const Page: NextPageWithLayout = () => {
                           )}
                         </div>
                         <div className="flex flex-col space-y-1 self-start">
-                          <span className="line-clamp-1 text-sm font-medium">
-                            {product.name}
+                          <span className="line-clamp-1 font-medium">
+                            {product.productName}
+                          </span>
+                          <span className="line-clamp-1 text-xs text-muted-foreground">
+                            {product.productVariantName}
                           </span>
                           <span className="line-clamp-1 text-xs text-muted-foreground">
                             {formatPrice(product.price)} x {c.quantity} ={" "}
@@ -198,7 +202,7 @@ const Page: NextPageWithLayout = () => {
               {formatPrice(
                 cartStore.carts.reduce(
                   (acc, item) =>
-                    acc + Number(item.product.price) * item.quantity,
+                    acc + Number(item.productVariant.price) * item.quantity,
                   0
                 )
               )}

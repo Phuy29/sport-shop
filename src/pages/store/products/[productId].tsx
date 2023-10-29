@@ -15,6 +15,7 @@ import { Icons } from "@/components/icons";
 import { Gallery } from "@/components/interfaces/store/gallery";
 import { VariantSelector } from "@/components/interfaces/store/variant-selector";
 import { Price } from "@/components/interfaces/store/price";
+import { AddToCartButton } from "@/components/interfaces/store/add-cart-button";
 
 const Page: NextPageWithLayout = () => {
   const router = useRouter();
@@ -83,7 +84,7 @@ const Page: NextPageWithLayout = () => {
 
           <Separator className="mt-5" />
 
-          <Accordion type="single" collapsible className="w-full">
+          <Accordion type="single" collapsible className="w-full mb-6">
             <AccordionItem value="description">
               <AccordionTrigger>Description</AccordionTrigger>
               <AccordionContent>
@@ -92,6 +93,8 @@ const Page: NextPageWithLayout = () => {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
+
+          <AddToCartButton product={product} variants={product.variants} />
         </div>
       </div>
     </Shell>

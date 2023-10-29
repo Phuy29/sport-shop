@@ -70,9 +70,9 @@ export default async function handler(
           });
 
           for (const item of order.items) {
-            const product = await prisma.product.findFirst({
+            const productVariant = await prisma.productVariant.findFirst({
               where: {
-                id: item.productId,
+                id: item.productVariantId ?? "",
               },
               select: {
                 id: true,
@@ -80,11 +80,11 @@ export default async function handler(
               },
             });
 
-            if (!product) {
-              throw new Error("Product not found.");
+            if (!productVariant) {
+              throw new Error("Product variant not found.");
             }
 
-            const inventory = product.inventory - item.quantity;
+            const inventory = productVariant.inventory - item.quantity;
 
             if (inventory < 0) {
               throw new Error("Product out of stock.");
@@ -92,16 +92,16 @@ export default async function handler(
 
             console.log({ inventory });
 
-            const newProduct = await prisma.product.update({
+            const newProductVariant = await prisma.productVariant.update({
               where: {
-                id: item.productId,
+                id: item.productVariantId ?? "",
               },
               data: {
                 inventory,
               },
             });
 
-            console.log({ newProduct });
+            console.log({ newProductVariant });
           }
           break;
         case "application_fee.created":
