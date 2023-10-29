@@ -34,21 +34,21 @@ import { z } from "zod";
 import { Separator } from "@/components/ui/separator";
 import { ProductOptions } from "./product-options-form";
 import { ProductVariants } from "./product-variants-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { isArrayOfFile } from "@/lib/utils";
 
 const formSchema = z.object({
   name: z.string().min(1, {
     message: "Must be at least 1 character",
   }),
   description: z.string(),
-  price: z.number(),
   collectionId: z.string().min(1, {
-    message: "Collection is required",
+    message: "Must be at least 1 character",
   }),
-  inventory: z.number(),
   images: z.unknown(),
   options: z.array(
     z.object({
-      name: z.string(),
+      name: z.string().min(1, { message: "Must be at least 1 character" }),
       values: z.array(z.string()),
     })
   ),
@@ -86,32 +86,32 @@ export function AddProductForm() {
   const { data } = trpc.admin.collections.get.useQuery();
 
   const form = useForm<Inputs>({
-    // resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       options: [{ name: "", values: [] }],
+      collectionId: "",
     },
   });
 
   async function onSubmit(data: Inputs) {
-    console.log({ data });
-    // const images = isArrayOfFile(data.images)
-    //   ? await startUpload(data.images).then((res) => {
-    //       const formattedImages = res?.map((image) => ({
-    //         id: image.key,
-    //         name: image.key.split("_")[1] ?? image.key,
-    //         url: image.url,
-    //       }));
-    //       return formattedImages ?? null;
-    //     })
-    //   : null;
-    // addProductMutation.mutate({
-    //   name: data.name,
-    //   description: data.description,
-    //   collectionId: data.collectionId,
-    //   price: data.price,
-    //   inventory: data.inventory,
-    //   images: images?.map((item) => item.url) ?? [],
-    // });
+    const images = isArrayOfFile(data.images)
+      ? await startUpload(data.images).then((res) => {
+          const formattedImages = res?.map((image) => ({
+            id: image.key,
+            name: image.key.split("_")[1] ?? image.key,
+            url: image.url,
+          }));
+          return formattedImages ?? null;
+        })
+      : null;
+    addProductMutation.mutate({
+      name: data.name,
+      description: data.description,
+      collectionId: data.collectionId,
+      images: images?.map((item) => item.url) ?? [],
+      options: data.options,
+      variants: data.variants,
+    });
   }
 
   return (
@@ -122,68 +122,79 @@ export function AddProductForm() {
       >
         <Separator />
 
-        <FormItem>
-          <FormLabel>Name</FormLabel>
-          <FormControl>
-            <Input
-              aria-invalid={!!form.formState.errors.name}
-              placeholder="Type product name here."
-              {...form.register("name")}
-            />
-          </FormControl>
-          <UncontrolledFormMessage
-            message={form.formState.errors.name?.message}
-          />
-        </FormItem>
+        <div>
+          <h1 className="font-semibold text-lg">General information</h1>
+          <p className="text-sm text-slate-500 mb-4">
+            To start selling, all you need is a name and a price.
+          </p>
 
-        <FormItem>
-          <FormLabel>Description</FormLabel>
-          <FormControl>
-            <Textarea
-              placeholder="Type product description here."
-              {...form.register("description")}
-            />
-          </FormControl>
-          <UncontrolledFormMessage
-            message={form.formState.errors.description?.message}
-          />
-        </FormItem>
-
-        <FormField
-          control={form.control}
-          name="collectionId"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormLabel>Collection</FormLabel>
+          <div className="space-y-4">
+            <FormItem>
+              <FormLabel>Name</FormLabel>
               <FormControl>
-                <Select
-                  value={field.value}
-                  onValueChange={(value: typeof field.value) =>
-                    field.onChange(value)
-                  }
-                >
-                  <SelectTrigger className="capitalize">
-                    <SelectValue placeholder={field.value} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {data?.collections.map((collection) => (
-                      <SelectItem key={collection.id} value={collection.id}>
-                        {collection.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  aria-invalid={!!form.formState.errors.name}
+                  placeholder="Type product name here."
+                  {...form.register("name")}
+                />
               </FormControl>
-              <FormMessage />
+              <UncontrolledFormMessage
+                message={form.formState.errors.name?.message}
+              />
             </FormItem>
-          )}
-        />
+
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Type product description here."
+                  {...form.register("description")}
+                />
+              </FormControl>
+              <UncontrolledFormMessage
+                message={form.formState.errors.description?.message}
+              />
+            </FormItem>
+
+            <FormField
+              control={form.control}
+              name="collectionId"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Collection</FormLabel>
+                  <FormControl>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value: typeof field.value) =>
+                        field.onChange(value)
+                      }
+                    >
+                      <SelectTrigger className="capitalize">
+                        <SelectValue placeholder={field.value} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {data?.collections.map((collection) => (
+                          <SelectItem key={collection.id} value={collection.id}>
+                            {collection.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <UncontrolledFormMessage
+                    message={form.formState.errors.collectionId?.message}
+                  />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
 
         <Separator />
 
         <div>
           <h1 className="font-semibold text-lg">Variants</h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-500 mb-4">
             Add variations of this product.
           </p>
 
@@ -194,38 +205,45 @@ export function AddProductForm() {
 
         <Separator />
 
-        <FormItem className="flex w-full flex-col gap-1.5">
-          <FormLabel>Images</FormLabel>
-          {files?.length ? (
-            <div className="flex items-center gap-2">
-              {files.map((file, i) => (
-                <Zoom key={i}>
-                  <Image
-                    src={file.preview}
-                    alt={file.name}
-                    className="h-20 w-20 shrink-0 rounded-md object-cover object-center"
-                    width={80}
-                    height={80}
-                  />
-                </Zoom>
-              ))}
-            </div>
-          ) : null}
-          <FormControl>
-            <FileDialog
-              setValue={form.setValue}
-              name="images"
-              maxFiles={3}
-              maxSize={1024 * 1024 * 4}
-              files={files}
-              setFiles={setFiles}
-              isUploading={isUploading}
+        <div>
+          <h1 className="font-semibold text-lg">Image</h1>
+          <p className="text-sm text-slate-500 mb-4">
+            Add images to this product.
+          </p>
+
+          <FormItem className="flex w-full flex-col gap-1.5">
+            <FormLabel>Images</FormLabel>
+            {files?.length ? (
+              <div className="flex items-center gap-2">
+                {files.map((file, i) => (
+                  <Zoom key={i}>
+                    <Image
+                      src={file.preview}
+                      alt={file.name}
+                      className="h-20 w-20 shrink-0 rounded-md object-cover object-center"
+                      width={80}
+                      height={80}
+                    />
+                  </Zoom>
+                ))}
+              </div>
+            ) : null}
+            <FormControl>
+              <FileDialog
+                setValue={form.setValue}
+                name="images"
+                maxFiles={3}
+                maxSize={1024 * 1024 * 4}
+                files={files}
+                setFiles={setFiles}
+                isUploading={isUploading}
+              />
+            </FormControl>
+            <UncontrolledFormMessage
+              message={form.formState.errors.images?.message}
             />
-          </FormControl>
-          <UncontrolledFormMessage
-            message={form.formState.errors.images?.message}
-          />
-        </FormItem>
+          </FormItem>
+        </div>
 
         <Button
           type="submit"

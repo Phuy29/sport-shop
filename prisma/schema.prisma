@@ -80,37 +80,56 @@ model Product {
   updatedAt    DateTime           @updatedAt
   collectionId String?
   collection   ProductCollection? @relation(fields: [collectionId], references: [id])
-  price        Float
+  price        Float              @default(0)
   inventory    Int                @default(0)
   images       Image[]
   options      ProductOption[]
+  variants     ProductVariant[]
   orderItem    OrderItem[]
 
   @@index([collectionId])
 }
 
 model ProductOption {
-  id        String           @id @default(uuid())
-  name      String
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
-  productId String?
-  product   Product?         @relation(fields: [productId], references: [id])
-  variants  ProductVariant[]
+  id          String               @id @default(uuid())
+  name        String
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  productId   String?
+  product     Product?             @relation(fields: [productId], references: [id])
+  optionValue ProductOptionValue[]
 
   @@index([productId])
 }
 
+model ProductOptionValue {
+  id        String          @id @default(uuid())
+  value     String
+  optionId  String?
+  option    ProductOption?  @relation(fields: [optionId], references: [id])
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([optionId])
+  @@index([variantId])
+}
+
 model ProductVariant {
-  id          String          @id @default(uuid())
+  id          String               @id @default(uuid())
   name        String
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  price       Float
-  originPrice Float
-  invetory    Int             @default(1)
-  options     ProductOption[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  price       Float                @default(0)
+  originPrice Float                @default(0)
+  inventory   Int                  @default(1)
+  productId   String?
+  product     Product?             @relation(fields: [productId], references: [id])
+  optionValue ProductOptionValue[]
   orderItems  OrderItem[]
+
+  @@index([productId])
 }
 
 enum PRODUCT_STATUS {

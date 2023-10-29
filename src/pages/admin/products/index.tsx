@@ -49,7 +49,9 @@ const Page: NextPageWithLayout = () => {
     },
   });
 
-  const columns: ColumnDef<Product>[] = [
+  if (!data) return <p>Loading...</p>;
+
+  const columns: ColumnDef<(typeof data)[number]>[] = [
     // {
     //   id: "select",
     //   header: ({ table }) => (
@@ -72,14 +74,14 @@ const Page: NextPageWithLayout = () => {
     //   enableHiding: false,
     // },
     {
-      accessorKey: "name",
+      id: "name",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Name" />
       ),
-      cell: ({ row }) => <div className="w-[80px]">{row.getValue("name")}</div>,
+      cell: ({ row }) => <div className="w-[80px]">{row.original.name}</div>,
     },
     {
-      accessorKey: "collection",
+      id: "collection",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Collection" />
       ),
@@ -92,19 +94,18 @@ const Page: NextPageWithLayout = () => {
       },
     },
     {
-      accessorKey: "price",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Price" />
-      ),
-      cell: ({ cell }) => {
-        return formatPrice(cell.getValue() as number);
-      },
-    },
-    {
-      accessorKey: "inventory",
+      id: "inventory",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Inventory" />
       ),
+      cell: ({ row }) => {
+        const inventory = row.original.variants.reduce(
+          (acc, item) => item.inventory + acc,
+          0
+        );
+
+        return `${inventory} in stock for ${row.original.variants.length} variant(s)`;
+      },
     },
     {
       id: "actions",
@@ -176,7 +177,7 @@ const Page: NextPageWithLayout = () => {
           </Button>
         </div>
         <CardContent>
-          <DataTable data={data?.products ?? []} columns={columns} />
+          <DataTable data={data ?? []} columns={columns} />
         </CardContent>
       </Card>
     </>

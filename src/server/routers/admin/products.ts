@@ -4,16 +4,16 @@ import { z } from "zod";
 
 export const productsAdminRouter = router({
   get: adminProcedure.query(async ({ ctx }) => {
-    const [count, products] = await ctx.prisma.$transaction([
-      ctx.prisma.product.count(),
-      ctx.prisma.product.findMany({
-        include: {
-          collection: true,
-          images: true,
-        },
-      }),
-    ]);
-    return { count, products };
+    const products = ctx.prisma.product.findMany({
+      include: {
+        collection: true,
+        images: true,
+        variants: true,
+        options: true,
+      },
+    });
+
+    return products;
   }),
 
   getOne: adminProcedure.input(z.string()).query(async ({ ctx, input }) => {
@@ -77,28 +77,65 @@ export const productsAdminRouter = router({
     .input(
       z.object({
         name: z.string().min(3),
-        price: z.number().min(0),
-        collectionId: z.string(),
         description: z.string().min(3),
+        collectionId: z.string(),
         images: z.array(z.string()),
-        inventory: z.number().default(1),
+        options: z.array(
+          z.object({
+            name: z.string(),
+            values: z.array(z.string()),
+          })
+        ),
+        variants: z.array(
+          z.object({
+            name: z.string(),
+            price: z.number(),
+            inventory: z.number(),
+            options: z.array(z.object({ name: z.string(), value: z.string() })),
+          })
+        ),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const product = await ctx.prisma.product.create({
         data: {
           name: input.name,
-          price: input.price,
           collectionId: input.collectionId,
           description: input.description,
-          inventory: input.inventory,
           images: {
             create: input.images.map((imageUrl) => ({
               url: imageUrl,
             })),
           },
+          options: {
+            create: input.options.map((option) => ({
+              name: option.name,
+            })),
+          },
+        },
+        include: {
+          options: true,
         },
       });
+
+      for (const variant of input.variants) {
+        const variants = await ctx.prisma.productVariant.create({
+          data: {
+            name: variant.name,
+            price: variant.price,
+            inventory: variant.inventory,
+            optionValue: {
+              create: variant.options.map((option) => ({
+                value: option.value,
+                optionId: product.options.find((x) => x.name === option.name)
+                  ?.id,
+              })),
+            },
+            productId: product.id,
+          },
+        });
+      }
+
       return product;
     }),
 
