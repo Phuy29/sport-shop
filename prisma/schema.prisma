@@ -72,20 +72,21 @@ model VerificationToken {
 }
 
 model Product {
-  id           String             @id @default(uuid())
-  name         String
-  description  String?
-  status       PRODUCT_STATUS     @default(DRAFT)
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
-  collectionId String?
-  collection   ProductCollection? @relation(fields: [collectionId], references: [id])
-  price        Float              @default(0)
-  inventory    Int                @default(0)
-  images       Image[]
-  options      ProductOption[]
-  variants     ProductVariant[]
-  orderItem    OrderItem[]
+  id                 String               @id @default(uuid())
+  name               String
+  description        String?
+  status             PRODUCT_STATUS       @default(DRAFT)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  collectionId       String?
+  collection         ProductCollection?   @relation(fields: [collectionId], references: [id])
+  price              Float                @default(0)
+  inventory          Int                  @default(0)
+  images             Image[]
+  options            ProductOption[]
+  variants           ProductVariant[]
+  orderItem          OrderItem[]
+  ProductOptionValue ProductOptionValue[]
 
   @@index([collectionId])
 }
@@ -109,11 +110,14 @@ model ProductOptionValue {
   option    ProductOption?  @relation(fields: [optionId], references: [id])
   variantId String?
   variant   ProductVariant? @relation(fields: [variantId], references: [id])
+  productId String?
+  product   Product?        @relation(fields: [productId], references: [id])
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
 
   @@index([optionId])
   @@index([variantId])
+  @@index([productId])
 }
 
 model ProductVariant {

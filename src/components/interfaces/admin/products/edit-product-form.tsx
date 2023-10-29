@@ -32,7 +32,7 @@ import { OurFileRouter } from "@/server/uploadthing";
 import { FileDialog, FileWithPreview } from "./file-dialog";
 import { Product } from "@/types/admin";
 import { z } from "zod";
-import { trpc } from "@/utils/trpc";
+import { RouterOutputs, trpc } from "@/utils/trpc";
 import { Zoom } from "./zoom-image";
 import {
   AlertDialog,
@@ -45,6 +45,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Separator } from "@/components/ui/separator";
+import { ProductOptions } from "./product-options-form";
+import { ProductVariants } from "./product-variants-form";
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
@@ -53,18 +56,30 @@ const formSchema = z.object({
     message: "Must be at least 1 character",
   }),
   description: z.string(),
-  price: z.number(),
   collectionId: z.string().min(1, {
-    message: "Collection is required",
+    message: "Must be at least 1 character",
   }),
-  inventory: z.number(),
   images: z.unknown(),
+  options: z.array(
+    z.object({
+      name: z.string().min(1, { message: "Must be at least 1 character" }),
+      values: z.array(z.string()),
+    })
+  ),
+  variants: z.array(
+    z.object({
+      name: z.string(),
+      price: z.number(),
+      inventory: z.number(),
+      options: z.array(z.object({ name: z.string(), value: z.string() })),
+    })
+  ),
 });
 
 type Inputs = z.infer<typeof formSchema> & { images: string[] };
 
 interface UpdateProductFormProps {
-  product: Product;
+  product: RouterOutputs["admin"]["products"]["getOne"];
 }
 
 export function UpdateProductForm({ product }: UpdateProductFormProps) {
@@ -86,8 +101,6 @@ export function UpdateProductForm({ product }: UpdateProductFormProps) {
       router.push(`/admin/products`);
     },
   });
-
-  console.log({ files });
 
   React.useEffect(() => {
     if (product.images && product.images.length > 0) {
@@ -112,7 +125,19 @@ export function UpdateProductForm({ product }: UpdateProductFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       collectionId: product.collectionId ?? undefined,
-      price: Number(product.price),
+      options: product.options.map((option) => ({
+        name: option.name,
+        values: Array.from(new Set(option.optionValue.map((val) => val.value))),
+      })),
+      variants: product.variants.map((variant) => ({
+        name: variant.name,
+        price: variant.price,
+        inventory: variant.inventory,
+        options: variant.optionValue.map((option) => ({
+          name: product.options.find((x) => x.id === option.optionId)?.name,
+          value: option.value,
+        })),
+      })),
     },
   });
 
@@ -133,144 +158,142 @@ export function UpdateProductForm({ product }: UpdateProductFormProps) {
       name: data.name,
       description: data.description,
       collectionId: data.collectionId,
-      price: data.price,
-      inventory: data.inventory,
       images: images?.map((item) => item.url) ?? [],
+      options: data.options,
+      variants: data.variants,
     });
   }
 
   return (
     <Form {...form}>
       <form
-        className="grid w-full max-w-2xl gap-5"
+        className="grid w-full max-w-4xl mx-auto gap-5"
         onSubmit={(...args) => void form.handleSubmit(onSubmit)(...args)}
       >
-        <FormItem>
-          <FormLabel>Name</FormLabel>
-          <FormControl>
-            <Input
-              aria-invalid={!!form.formState.errors.name}
-              placeholder="Type product name here."
-              {...form.register("name")}
-              defaultValue={product.name}
+        <Separator />
+
+        <div>
+          <h1 className="font-semibold text-lg">General information</h1>
+          <p className="text-sm text-slate-500 mb-4">
+            To start selling, all you need is a name and a price.
+          </p>
+
+          <div className="space-y-4">
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input
+                  aria-invalid={!!form.formState.errors.name}
+                  placeholder="Type product name here."
+                  {...form.register("name")}
+                  defaultValue={product.name}
+                />
+              </FormControl>
+              <UncontrolledFormMessage
+                message={form.formState.errors.name?.message}
+              />
+            </FormItem>
+
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Type product description here."
+                  {...form.register("description")}
+                  defaultValue={product.description ?? ""}
+                />
+              </FormControl>
+              <UncontrolledFormMessage
+                message={form.formState.errors.description?.message}
+              />
+            </FormItem>
+
+            <FormField
+              control={form.control}
+              name="collectionId"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Collection</FormLabel>
+                  <FormControl>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value: typeof field.value) =>
+                        field.onChange(value)
+                      }
+                    >
+                      <SelectTrigger className="capitalize">
+                        <SelectValue placeholder={field.value} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {data?.collections.map((collection) => (
+                          <SelectItem key={collection.id} value={collection.id}>
+                            {collection.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </FormControl>
-          <UncontrolledFormMessage
-            message={form.formState.errors.name?.message}
-          />
-        </FormItem>
-        <FormItem>
-          <FormLabel>Description</FormLabel>
-          <FormControl>
-            <Textarea
-              placeholder="Type product description here."
-              {...form.register("description")}
-              defaultValue={product.description ?? ""}
-            />
-          </FormControl>
-          <UncontrolledFormMessage
-            message={form.formState.errors.description?.message}
-          />
-        </FormItem>
-        <div className="flex flex-col items-start gap-6 sm:flex-row">
-          <FormField
-            control={form.control}
-            name="collectionId"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Category</FormLabel>
-                <FormControl>
-                  <Select
-                    value={field.value}
-                    onValueChange={(value: typeof field.value) =>
-                      field.onChange(value)
-                    }
-                  >
-                    <SelectTrigger className="capitalize">
-                      <SelectValue placeholder={field.value} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {data?.collections.map((collection) => (
-                        <SelectItem key={collection.id} value={collection.id}>
-                          {collection.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          </div>
         </div>
-        <div className="flex flex-col items-start gap-6 sm:flex-row">
-          <FormItem className="w-full">
-            <FormLabel>Price</FormLabel>
+
+        <Separator />
+
+        <div>
+          <h1 className="font-semibold text-lg">Variants</h1>
+          <p className="text-sm text-slate-500 mb-4">
+            Add variations of this product.
+          </p>
+
+          <ProductOptions />
+
+          <ProductVariants />
+        </div>
+
+        <Separator />
+
+        <div>
+          <h1 className="font-semibold text-lg">Image</h1>
+          <p className="text-sm text-slate-500 mb-4">
+            Add images to this product.
+          </p>
+          <FormItem className="flex w-full flex-col gap-1.5">
+            <FormLabel>Images</FormLabel>
+            {files?.length ? (
+              <div className="flex items-center gap-2">
+                {files.map((file, i) => (
+                  <Zoom key={i}>
+                    <Image
+                      src={file.preview}
+                      alt={file.name}
+                      className="h-20 w-20 shrink-0 rounded-md object-cover object-center"
+                      width={80}
+                      height={80}
+                    />
+                  </Zoom>
+                ))}
+              </div>
+            ) : null}
             <FormControl>
-              <Input
-                type="number"
-                inputMode="numeric"
-                placeholder="Type product price here."
-                {...form.register("price", {
-                  valueAsNumber: true,
-                })}
-                defaultValue={product.price}
+              <FileDialog
+                setValue={form.setValue}
+                name="images"
+                maxFiles={3}
+                maxSize={1024 * 1024 * 4}
+                files={files}
+                setFiles={setFiles}
+                isUploading={isUploading}
               />
             </FormControl>
             <UncontrolledFormMessage
-              message={form.formState.errors.price?.message}
-            />
-          </FormItem>
-          <FormItem className="w-full">
-            <FormLabel>Inventory</FormLabel>
-            <FormControl>
-              <Input
-                type="number"
-                inputMode="numeric"
-                placeholder="Type product inventory here."
-                {...form.register("inventory", {
-                  valueAsNumber: true,
-                })}
-                defaultValue={product.inventory}
-              />
-            </FormControl>
-            <UncontrolledFormMessage
-              message={form.formState.errors.inventory?.message}
+              message={form.formState.errors.images?.message}
             />
           </FormItem>
         </div>
-        <FormItem className="flex w-full flex-col gap-1.5">
-          <FormLabel>Images</FormLabel>
-          {files?.length ? (
-            <div className="flex items-center gap-2">
-              {files.map((file, i) => (
-                <Zoom key={i}>
-                  <Image
-                    src={file.preview}
-                    alt={file.name}
-                    className="h-20 w-20 shrink-0 rounded-md object-cover object-center"
-                    width={80}
-                    height={80}
-                  />
-                </Zoom>
-              ))}
-            </div>
-          ) : null}
-          <FormControl>
-            <FileDialog
-              setValue={form.setValue}
-              name="images"
-              maxFiles={3}
-              maxSize={1024 * 1024 * 4}
-              files={files}
-              setFiles={setFiles}
-              isUploading={isUploading}
-            />
-          </FormControl>
-          <UncontrolledFormMessage
-            message={form.formState.errors.images?.message}
-          />
-        </FormItem>
+
         <div className="flex space-x-2">
           <Button disabled={updateProductMutation.isLoading}>
             {updateProductMutation.isLoading && (

@@ -68,6 +68,7 @@ export const ProductOptions = () => {
                     <FormItem>
                       <FormControl>
                         <Input
+                          defaultValue={field.value.join(", ")}
                           placeholder="S, M, L,..."
                           onChange={(e) => {
                             const val = e.target.value;
